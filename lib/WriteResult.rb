@@ -23,13 +23,13 @@ class WriteResult
 
 	def createCSVResult()
 		CSV.open("ProjectMetrics.csv", "ab") do |csv|
-			csv << ["ProjectName", "NumberForks", "NumberStars", "Size"]
+			csv << ["ProjectName", "NumberForks", "NumberStars", "Minimum Pushed","NumberContributors"]
 		end
 	end
 
-	def writeProjectMetrics(projectName, numberForks, numberStars, size)
+	def writeProjectMetrics(projectName, numberForks, numberStars, pushed, numberContributors)
 		CSV.open("ProjectMetrics.csv", "ab") do |csv|
-			csv << [projectName, numberForks, numberStars, size]
+			csv << [projectName, numberForks, numberStars, pushed, numberContributors]
 		end
 	end
 
