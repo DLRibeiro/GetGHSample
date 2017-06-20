@@ -15,7 +15,7 @@ class GHSearch
 	end
 
 	def runSearch()
-		print("language = #{@language}, pushed at = #{@pushed}, numerStars = #{@numberStars}\n")
+		print("language = #{@language}, numberForks = #{@numberForks}, numberStars = #{@numberStars}, minimum push at = #{@pushed}\n")
 		client = runAuthentication()
 		queryGeneral = "language:#{@language} forks:\">#{@numberForks}\" stars:\">#{@numberStars}\" pushed:\">=#{@pushed}\""
 		results = client.search_repositories(queryGeneral,:per_page => 100)
@@ -24,33 +24,37 @@ class GHSearch
 		last_response = client.last_response
 		number_of_pages = last_response.rels[:last].href.match(/page=(\d+).*$/)[1]
 
-		puts "There are #{total_count} results, on #{number_of_pages} pages!"
+		puts "There are #{total_count} results, on #{number_of_pages} pages, before additional filters!"
 		puts "And here's the first path for every set"
 		puts last_response.data.items.first.path
 
 		until last_response.rels[:next].nil?
 			last_response = last_response.rels[:next].get
-			#sleep 4 # back off from the API rate limiting; don't do this in Real Life
+			sleep 4 # back off from the API rate limiting; don't do this in Real Life
 			break if last_response.rels[:next].nil?
 			last_response.data.items.each do |project|
 				name = project["full_name"]
 				contributorsList = client.contributors_stats(name)
-				numberContributors = contributorsList.length
-				if (numberContributors >= @contributors.to_i)
-					queryByFileName = "in:path repo:#{name} filename:routes.rb"
-					queryResult = client.search_code(queryByFileName)
+				if (contributorsList == nil)
+					print "was not able to get authors list\n"
+				else
+					numberContributors = contributorsList.size
+					if (numberContributors >= @contributors.to_i)
+						queryByFileName = "in:path repo:#{name} filename:routes.rb"
+						queryResult = client.search_code(queryByFileName)
 
-					if (queryResult.total_count > 0)
-						print name #debugging
-						print " number of contributors= #{numberContributors}\n" #debugging
-						print "\n"
-						@writeResult.writeNewProject(name.to_s)
-						@writeResult.writeProjectMetrics(name.to_s, project["forks_count"].to_s, project["stargazers_count"].to_s, @pushed, numberContributors )
-						#sleep 4
+						if (queryResult.total_count > 0)
+							print name #debugging
+							print " number of contributors= #{numberContributors}\n" #debugging
+							print "\n"
+							@writeResult.writeNewProject(name.to_s)
+							@writeResult.writeProjectMetrics(name.to_s, project["forks_count"].to_s, project["stargazers_count"].to_s, @pushed, numberContributors )
+							sleep 4
+						end
 					end
 				end
 				#end
-				#sleep 10
+				sleep 10
 			end
 		end
 		@writeResult.closeProjectListFile()
