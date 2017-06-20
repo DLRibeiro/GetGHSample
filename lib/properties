@@ -1,5 +1,7 @@
-loginGitHub=<leusonmario>
-passwordGitHub=<juventus164sou>
-language=<java>
+loginGitHub=<login>
+passwordGitHub=<password>
+language=<ruby>
 numberForks=<20>
 numberStars=<200>
+pushed=<yyyy-mm-dd>
+contributors=<10>
